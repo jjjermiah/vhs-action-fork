@@ -819,7 +819,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const fs = __importStar(__nccwpck_require__(9896));
 const path = __importStar(__nccwpck_require__(6928));
-const intaller = __importStar(__nccwpck_require__(8328));
+const installer = __importStar(__nccwpck_require__(8328));
 const deps = __importStar(__nccwpck_require__(2403));
 const fonts = __importStar(__nccwpck_require__(2662));
 const core = __importStar(__nccwpck_require__(7484));
@@ -829,6 +829,8 @@ function run() {
         try {
             const version = core.getInput('version');
             const filePath = core.getInput('path');
+            const outputPath = core.getInput('output');
+            const publish = core.getInput('publish');
             // Fail fast if file does not exist.
             if (filePath) {
                 if (!fs.existsSync(filePath)) {
@@ -842,17 +844,39 @@ function run() {
             }
             yield fonts.install();
             yield deps.install();
-            const bin = yield intaller.install(version);
+            const bin = yield installer.install(version);
             core.info('Adding VHS to PATH');
             core.addPath(path.dirname(bin));
-            // Unset the CI variable to prevent Termenv from ignoring terminal ANSI
-            // sequences.
+            // Unset the CI variable to prevent Termenv from ignoring terminal ANSI sequences.
             core.exportVariable('CI', '');
             // GitHub Actions support terminal true colors, so we can enable it.
             core.exportVariable('COLORTERM', 'truecolor');
             if (filePath) {
                 core.info('Running VHS');
                 yield exec.exec(`${bin} ${filePath}`);
+                if (publish) { // if publish is 'true'
+                    // Check if output path is provided and exists
+                    if (outputPath) {
+                        const outputFile = path.join(process.cwd(), outputPath);
+                        if (!fs.existsSync(outputFile)) {
+                            throw new Error(`Output file ${outputFile} does not exist`);
+                        }
+                    }
+                    // Run publish command and capture the output
+                    core.info('Publishing recording');
+                    const publishOutput = yield exec.getExecOutput(`${bin} publish ${outputPath}`);
+                    // Set the entire output string as a GitHub Actions output
+                    core.setOutput('gif-url', publishOutput.stdout);
+                }
+                else {
+                    core.info('Skipping publishing');
+                }
+            }
+            else if (publish === 'true') {
+                core.info('wrong check');
+            }
+            else {
+                core.info('No path provided, skipping publishing');
             }
         }
         catch (error) {
