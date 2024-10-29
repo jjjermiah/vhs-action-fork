@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as intaller from './installer'
+import * as installer from './installer'
 import * as deps from './dependencies'
 import * as fonts from './fonts'
 import * as core from '@actions/core'
@@ -12,6 +12,7 @@ async function run(): Promise<void> {
     const filePath = core.getInput('path')
     const outputPath = core.getInput('output')
     const publish = core.getInput('publish')
+
     // Fail fast if file does not exist.
     if (filePath) {
       if (!fs.existsSync(filePath)) {
@@ -25,13 +26,12 @@ async function run(): Promise<void> {
 
     await fonts.install()
     await deps.install()
-    const bin = await intaller.install(version)
+    const bin = await installer.install(version)
 
     core.info('Adding VHS to PATH')
     core.addPath(path.dirname(bin))
 
-    // Unset the CI variable to prevent Termenv from ignoring terminal ANSI
-    // sequences.
+    // Unset the CI variable to prevent Termenv from ignoring terminal ANSI sequences.
     core.exportVariable('CI', '')
 
     // GitHub Actions support terminal true colors, so we can enable it.
@@ -42,7 +42,7 @@ async function run(): Promise<void> {
       await exec.exec(`${bin} ${filePath}`)
 
       if (publish) {
-        // check if output path is provided and exists
+        // Check if output path is provided and exists
         if (outputPath) {
           const outputFile = path.join(process.cwd(), outputPath)
           if (!fs.existsSync(outputFile)) {
@@ -50,19 +50,12 @@ async function run(): Promise<void> {
           }
         }
 
-        let gifUrl = ''
-        const options: exec.ExecOptions = {
-          listeners: {
-            stdout: (data: Buffer) => {
-              gifUrl += data.toString()
-            }
-          }
-        }
-        const outputFile = path.join(process.cwd(), outputPath)
-        await exec.exec(`${bin} publish ${outputFile}`, [], options)
-        gifUrl = gifUrl.trim()
-        core.info(`uploaded GIF URL: ${gifUrl}`)
-        core.setOutput('gif-url', gifUrl)
+        // Run publish command and capture the output
+        core.info('Publishing recording')
+        const publishOutput = await exec.getExecOutput(`${bin} publish ${outputPath}`)
+
+        // Set the entire output string as a GitHub Actions output
+        core.setOutput('gif-url', publishOutput.stdout)
       }
     } else {
       core.info('No path provided, skipping publishing')

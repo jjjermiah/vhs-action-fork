@@ -29,8 +29,6 @@ jobs:
       
       - uses: actions/github-script@v7
         with:
-          # This snippet is public-domain, taken from
-          # https://github.com/oprypin/nightly.link/blob/master/.github/workflows/pr-comment.yml
           script: |
             async function upsertComment(owner, repo, issue_number, purpose, body) {
               const {data: comments} = await github.rest.issues.listComments(
@@ -54,8 +52,8 @@ jobs:
 
             const {owner, repo} = context.repo;
             const issue_number = context.issue.number;
-            const urls = "${{ steps.vhs_step.outputs.gif-url }}";
-            const body = "VHS tape file ([`vhs.tape`](./vhs.tape)) has changed. link: [vhs.charm.sh](${urls[0]})\n\n" +
-                `<img src="${urls[0]}" width="600px" />`;
+
+            // Use the output from the vhs_step to set the comment body
+            const body = `Here's the generated GIF:\n\n![Generated GIF](${{ steps.vhs_step.outputs.gif-url }})`;
             core.info("Review thread message body:", body);
-            await upsertComment(owner, repo, issue_number, "gif-commenter ${{ matrix.path }}", body);
+            await upsertComment(owner, repo, issue_number, "gif-commenter", body);
