@@ -23,6 +23,7 @@ jobs:
         id: vhs_step
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          path: vhs.tape
           publish: true
       
       - uses: actions/github-script@v7

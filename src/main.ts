@@ -54,6 +54,8 @@ async function run(): Promise<void> {
         core.debug(`uploaded GIF URL: ${gifUrl}`)
         core.setOutput('gif-url', gifUrl)
       }
+    } else {
+      core.info('No path provided, skipping publishing')
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
