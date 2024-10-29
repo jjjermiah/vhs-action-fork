@@ -51,7 +51,7 @@ async function run(): Promise<void> {
         }
         await exec.exec(`${bin} publish -q ${filePath}`, [], options)
         gifUrl = gifUrl.trim()
-        core.debug(`uploaded GIF URL: ${gifUrl}`)
+        core.info(`uploaded GIF URL: ${gifUrl}`)
         core.setOutput('gif-url', gifUrl)
       }
     } else {
