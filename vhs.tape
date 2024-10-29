@@ -40,16 +40,15 @@
 #   Hide                            Hide the subsequent commands from the output
 #   Show                            Show the subsequent commands in the output
 
+
 Output vhs.gif
-Output vhs.mp4
-Output vhs.webm
 
 Set FontSize 46
 Set Width 1200
 Set Height 600
 Set PlaybackSpeed 2
 
-Type "echo Welcome to VHS Action! 📼"
+Type "echo Welcome to VHS Action! 2📼"
 
 Sleep 500ms
 

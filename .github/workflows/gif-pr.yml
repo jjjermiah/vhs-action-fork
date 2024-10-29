@@ -10,6 +10,10 @@ permissions:
 
 jobs:
   gif-pr:
+    permissions:
+      pull-requests: write # for amannn/action-semantic-pull-request to analyze PRs
+      statuses: write # for amannn/action-semantic-pull-request to mark status of analyzed PR
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,12 +23,12 @@ jobs:
         id: vhs_step
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          path: vhs.tape
+          output: vhs.gif
           publish: true
       
       - uses: actions/github-script@v7
         with:
-          # This snippet is public-domain, taken from
-          # https://github.com/oprypin/nightly.link/blob/master/.github/workflows/pr-comment.yml
           script: |
             async function upsertComment(owner, repo, issue_number, purpose, body) {
               const {data: comments} = await github.rest.issues.listComments(
@@ -48,8 +52,8 @@ jobs:
 
             const {owner, repo} = context.repo;
             const issue_number = context.issue.number;
-            const urls = "${{ steps.vhs_step.outputs.gif-url }}";
-            const body = "VHS tape file ([`vhs.tape`](./vhs.tape)) has changed.\n\n" +
-                `<img src="${urls[0]}" width="600px" />`;
+
+            // Use the output from the vhs_step to set the comment body
+            const body = `Here's the generated GIF:\n\n![Generated GIF](${{ steps.vhs_step.outputs.gif-url }})`;
             core.info("Review thread message body:", body);
-            await upsertComment(owner, repo, issue_number, "gif-commenter ${{ matrix.path }}", body);
+            await upsertComment(owner, repo, issue_number, "gif-commenter", body);
