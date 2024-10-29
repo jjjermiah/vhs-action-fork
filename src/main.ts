@@ -10,6 +10,7 @@ async function run(): Promise<void> {
   try {
     const version = core.getInput('version')
     const filePath = core.getInput('path')
+    const outputPath = core.getInput('output')
     const publish = core.getInput('publish')
     // Fail fast if file does not exist.
     if (filePath) {
@@ -41,6 +42,14 @@ async function run(): Promise<void> {
       await exec.exec(`${bin} ${filePath}`)
 
       if (publish) {
+        // check if output path is provided and exists
+        if (outputPath) {
+          const outputFile = path.join(process.cwd(), outputPath)
+          if (!fs.existsSync(outputFile)) {
+            throw new Error(`Output file ${outputFile} does not exist`)
+          }
+        }
+
         let gifUrl = ''
         const options: exec.ExecOptions = {
           listeners: {
@@ -49,7 +58,8 @@ async function run(): Promise<void> {
             }
           }
         }
-        await exec.exec(`${bin} publish -q ${filePath}`, [], options)
+        const outputFile = path.join(process.cwd(), outputPath)
+        await exec.exec(`${bin} publish ${outputFile}`, [], options)
         gifUrl = gifUrl.trim()
         core.info(`uploaded GIF URL: ${gifUrl}`)
         core.setOutput('gif-url', gifUrl)

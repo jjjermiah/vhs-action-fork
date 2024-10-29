@@ -24,6 +24,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: vhs.tape
+          output: vhs.gif
           publish: true
       
       - uses: actions/github-script@v7
