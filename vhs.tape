@@ -47,7 +47,7 @@ Set Width 1200
 Set Height 600
 Set PlaybackSpeed 2
 
-Type "echo Welcome to VHS Action! 📼"
+Type "echo Welcome to VHS Action! 2📼"
 
 Sleep 500ms
 
