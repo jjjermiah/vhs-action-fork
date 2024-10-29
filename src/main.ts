@@ -41,7 +41,7 @@ async function run(): Promise<void> {
       core.info('Running VHS')
       await exec.exec(`${bin} ${filePath}`)
 
-      if (publish) {
+      if (publish) { // if publish is 'true'
         // Check if output path is provided and exists
         if (outputPath) {
           const outputFile = path.join(process.cwd(), outputPath)
@@ -56,7 +56,11 @@ async function run(): Promise<void> {
 
         // Set the entire output string as a GitHub Actions output
         core.setOutput('gif-url', publishOutput.stdout)
+      } else {
+        core.info('Skipping publishing')
       }
+    } else if (publish === 'true') {
+      core.info('wrong check')
     } else {
       core.info('No path provided, skipping publishing')
     }
